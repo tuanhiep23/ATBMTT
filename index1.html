@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mã hóa & Giải mã Tệp (Mô phỏng DES)</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin-bottom: 40px; }
+        button, input { margin: 5px; }
+        .result { border: 1px solid #ccc; padding: 10px; min-height: 50px; }
+        style
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #969da9, #bec9de);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: rgba(175, 131, 131, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        h1 {
+            text-align: center;
+            color: #394e52;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-size: 2.5em;
+        }
+
+        p.date {
+            text-align: center;
+            font-size: 1em;
+            color: #415057;
+            margin-bottom: 20px;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            color: #ffeb3b;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            margin: 10px 0;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            resize: vertical;
+            font-size: 0.9em;
+        }
+
+        textarea:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        input[type="text"], input[type="file"] {
+            width: 70%;
+            padding: 10px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-size: 0.9em;
+        }
+
+        input[type="text"]:focus, input[type="file"]:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        button {
+            padding: 12px 25px;
+            margin: 5px;
+            background: linear-gradient(45deg, #ff6f61, #ff8a65);
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, #ff8a65, #ff6f61);
+            transform: scale(1.05);
+        }
+
+        #encrypt-result, #decrypt-result {
+            color: #81c784;
+            margin-top: 10px;
+            font-size: 0.9em;
+            min-height: 1em;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+                width: 95%;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+            textarea, input[type="text"], input[type="file"] {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Mã hóa & Giải mã Tệp (Mô phỏng DES)</h1>
+    <p>Ngày hiện tại: 14 tháng 5, 2025 - 01:35 PM +07</p>
+
+    <div class="section">
+        <h2>Mã hóa Tệp</h2>
+        <label for="keyEncrypt">Mã khóa:</label>
+        <input type="text" id="keyEncrypt" placeholder="Nhập mã khóa để mã hóa">
+        <br>
+        <input type="file" id="fileInputEncrypt" accept="*/*">
+        <br>
+        <button onclick="encryptFile()">Mã hóa</button>
+        <button onclick="downloadEncrypted()" id="downloadEncryptBtn" disabled>Tải xuống tệp mã hóa</button>
+        <p>Kết quả sẽ xuất hiện tại đây...</p>
+        <div id="encryptedResult" class="result">Dữ liệu mã hóa sẽ xuất hiện tại đây...</div>
+    </div>
+
+    <div class="section">
+        <h2>Giải mã Tệp</h2>
+        <label for="keyDecrypt">Mã khóa:</label>
+        <input type="text" id="keyDecrypt" placeholder="Nhập mã khóa để giải mã">
+        <br>
+        <input type="file" id="fileInputDecrypt" accept="*/*">
+        <br>
+        <button onclick="decryptFile()">Giải mã</button>
+        <button onclick="downloadDecrypted()" id="downloadDecryptBtn" disabled>Tải xuống tệp giải mã</button>
+        <p>Kết quả sẽ xuất hiện tại đây...</p>
+        <div id="decryptedResult" class="result">Dữ liệu giải mã sẽ xuất hiện tại đây...</div>
+    </div>
+
+    <script>
+        let encryptedData = null;
+        let decryptedData = null;
+
+        // Simple DES-like encryption (XOR-based simulation for demo purposes)
+        function simpleDES(text, key) {
+            if (!key) return text; // No key, return original
+            let result = '';
+            for (let i = 0; i < text.length; i++) {
+                result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+            }
+            return result;
+        }
+
+        // Convert string to Base64 for safe display and download
+        function toBase64(str) {
+            return btoa(str);
+        }
+
+        // Convert Base64 to string
+        function fromBase64(str) {
+            return atob(str);
+        }
+
+        // Encrypt file
+        function encryptFile() {
+            const fileInput = document.getElementById('fileInputEncrypt');
+            const key = document.getElementById('keyEncrypt').value;
+            const resultDiv = document.getElementById('encryptedResult');
+            const downloadBtn = document.getElementById('downloadEncryptBtn');
+
+            if (!fileInput.files[0]) {
+                resultDiv.textContent = 'Vui lòng chọn một tệp!';
+                return;
+            }
+            if (!key) {
+                resultDiv.textContent = 'Vui lòng nhập mã khóa!';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                encryptedData = simpleDES(text, key);
+                const base64Data = toBase64(encryptedData);
+                resultDiv.textContent = 'Dữ liệu mã hóa (Base64): ' + base64Data;
+                downloadBtn.disabled = false;
+            };
+            reader.readAsText(fileInput.files[0]);
+        }
+
+        // Decrypt file
+        function decryptFile() {
+            const fileInput = document.getElementById('fileInputDecrypt');
+            const key = document.getElementById('keyDecrypt').value;
+            const resultDiv = document.getElementById('decryptedResult');
+            const downloadBtn = document.getElementById('downloadDecryptBtn');
+
+            if (!fileInput.files[0]) {
+                resultDiv.textContent = 'Vui lòng chọn một tệp!';
+                return;
+            }
+            if (!key) {
+                resultDiv.textContent = 'Vui lòng nhập mã khóa!';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Data = e.target.result;
+                try {
+                    const text = fromBase64(base64Data);
+                    decryptedData = simpleDES(text, key);
+                    resultDiv.textContent = 'Dữ liệu giải mã: ' + decryptedData;
+                    downloadBtn.disabled = false;
+                } catch (e) {
+                    resultDiv.textContent = 'Lỗi giải mã: Mã khóa hoặc dữ liệu không hợp lệ!';
+                }
+            };
+            reader.readAsText(fileInput.files[0]);
+        }
+
+        // Download encrypted file
+        function downloadEncrypted() {
+            if (!encryptedData) return;
+            const blob = new Blob([encryptedData], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'encrypted_file.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Download decrypted file
+        function downloadDecrypted() {
+            if (!decryptedData) return;
+            const blob = new Blob([decryptedData], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'decrypted_file.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
